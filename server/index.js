@@ -80,7 +80,7 @@ app.get('/', (req, res) => {
 });
 
 // Auth routes
-app.use('/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 // Task routes
 app.use('/api/tasks', (req, res, next) => {
   req.io = io;
