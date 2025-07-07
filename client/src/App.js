@@ -17,7 +17,7 @@ function App() {
   }, []);
 
   const handleGoogleSignIn = () => {
-    window.location.href = `${process.env.REACT_APP_API_URL}/auth/google`;
+    window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/google`;
   };
 
   const handleLogout = () => {

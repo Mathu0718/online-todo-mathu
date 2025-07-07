@@ -29,21 +29,7 @@ const io = new SocketIOServer(server, {
 
 // Middleware
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin) return callback(null, true);
-    // Allow localhost and your deployed frontend
-    const allowedOrigins = [
-      process.env.CLIENT_URL || 'http://localhost:3000',
-      'http://localhost:3000',
-      'https://your-frontend.onrender.com' // <-- replace with your actual deployed frontend URL
-    ];
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: process.env.CLIENT_URL,
   credentials: true
 }));
 app.use(express.json());
@@ -51,12 +37,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Session setup
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'supersecret',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: true, // important for HTTPS
+    sameSite: 'None', // allow cross-site cookies
+    httpOnly: true,
   },
 }));
 
