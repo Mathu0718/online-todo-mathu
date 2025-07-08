@@ -6,14 +6,13 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import './models/User.js';
-import './config/passport.js';
 import authRoutes from './routes/auth.js';
 import tasksRoutes from './routes/tasks.js';
 import notificationsRoutes from './routes/notifications.js';
 import usersRoutes from './routes/users.js';
 import { sendDeadlineReminders } from './utils/deadlineReminder.js';
 import { apiLimiter } from './rateLimit.js';
+import MongoStore from 'connect-mongo';
 
 // Load environment variables
 dotenv.config();
@@ -42,6 +41,10 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: 'sessions',
+  }),
   cookie: {
     secure: true, // important for HTTPS
     sameSite: 'None', // allow cross-site cookies
@@ -52,21 +55,6 @@ app.use(session({
 // Passport setup
 app.use(passport.initialize());
 app.use(passport.session());
-
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/todo-app', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-mongoose.connection.on('connected', () => {
-  console.log('MongoDB connected');
-});
-
-// Basic route
-app.get('/', (req, res) => {
-  res.send('API is running');
-});
 
 // Auth routes
 app.use('/api/auth', authRoutes);

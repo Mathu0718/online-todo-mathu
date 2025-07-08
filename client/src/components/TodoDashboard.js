@@ -26,7 +26,7 @@ export default function TodoDashboard({ user, onLogout }) {
 
   // Fetch tasks
   const fetchTasks = () => {
-    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/tasks`, {
+    fetch(`${process.env.REACT_APP_API_URL}/api/tasks`, {
       credentials: 'include',
     })
       .then(res => res.json())
@@ -36,7 +36,7 @@ export default function TodoDashboard({ user, onLogout }) {
   useEffect(() => {
     fetchTasks();
     // Setup socket.io
-    socketRef.current = io(process.env.REACT_APP_API_URL || 'http://localhost:5000', {
+    socketRef.current = io(process.env.REACT_APP_API_URL, {
       withCredentials: true
     });
     socketRef.current.emit('join', user._id);
@@ -86,7 +86,7 @@ export default function TodoDashboard({ user, onLogout }) {
         return;
       }
       // Fetch user IDs for emails
-      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/by-emails`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/users/by-emails`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -117,7 +117,7 @@ export default function TodoDashboard({ user, onLogout }) {
       // If user is a collaborator, do not send collaborators field at all
       delete payload.collaborators;
     }
-    const url = `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/tasks${editingId ? `/${editingId}` : ''}`;
+    const url = `${process.env.REACT_APP_API_URL}/api/tasks${editingId ? `/${editingId}` : ''}`;
     const method = editingId ? 'PUT' : 'POST';
     const res = await fetch(url, {
       method,
@@ -192,7 +192,7 @@ export default function TodoDashboard({ user, onLogout }) {
 
   // Delete task
   const handleDelete = async id => {
-    await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/tasks/${id}`, {
+    await fetch(`${process.env.REACT_APP_API_URL}/api/tasks/${id}`, {
       method: 'DELETE',
       credentials: 'include',
     });
