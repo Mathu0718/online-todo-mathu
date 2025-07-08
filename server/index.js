@@ -6,6 +6,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
+import './config/passport.js';
 import authRoutes from './routes/auth.js';
 import tasksRoutes from './routes/tasks.js';
 import notificationsRoutes from './routes/notifications.js';
