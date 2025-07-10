@@ -7,7 +7,7 @@ function App() {
 
   useEffect(() => {
     // Check if user is authenticated
-    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/auth/user`, {
+    fetch(`${process.env.REACT_APP_API_URL || 'https://online-todo-mathu-backend.onrender.com'}/auth/user`, {
       credentials: 'include',
     })
       .then(res => res.ok ? res.json() : null)
@@ -17,11 +17,11 @@ function App() {
   }, []);
 
   const handleGoogleSignIn = () => {
-    window.location.href = `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/auth/google`;
+    window.location.href = `${process.env.REACT_APP_API_URL || 'https://online-todo-mathu-backend.onrender.com'}/auth/google`;
   };
 
   const handleLogout = () => {
-    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/auth/logout`, {
+    fetch(`${process.env.REACT_APP_API_URL || 'https://online-todo-mathu-backend.onrender.com'}/auth/logout`, {
       credentials: 'include',
     }).then(() => window.location.reload());
   };

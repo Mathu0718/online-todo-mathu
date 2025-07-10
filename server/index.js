@@ -22,7 +22,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: process.env.CLIENT_URL || 'https://online-todo-mathu-frontend.onrender.com',
     credentials: true
   }
 });
@@ -34,8 +34,7 @@ app.use(cors({
     if (!origin) return callback(null, true);
     // Allow localhost and your deployed frontend
     const allowedOrigins = [
-      'http://localhost:3000',
-      'https://your-frontend.onrender.com' // <-- replace with your actual deployed frontend URL
+      'https://online-todo-mathu-frontend.onrender.com' // <-- replace with your actual deployed frontend URL
     ];
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
@@ -64,7 +63,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/todo-app', {
+mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://mathuchinnamurugan:Mathu%4007182004@cluster0.zfmdaro.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
