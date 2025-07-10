@@ -9,10 +9,11 @@ router.get('/google', authLimiter, passport.authenticate('google', { scope: ['pr
 
 // Google OAuth callback
 router.get('/google/callback',
-  passport.authenticate('google', {
-    successRedirect: `${process.env.CLIENT_URL}/dashboard`,
-    failureRedirect: `${process.env.CLIENT_URL}/login`,
-  })
+  passport.authenticate('google', { failureRedirect: '/' }),
+  (req, res) => {
+    // Redirect to dashboard or client app after successful login
+    res.redirect(process.env.CLIENT_URL || 'http://localhost:3000');
+  }
 );
 
 // Logout

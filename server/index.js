@@ -6,6 +6,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
+import './models/User.js';
 import './config/passport.js';
 import authRoutes from './routes/auth.js';
 import tasksRoutes from './routes/tasks.js';
@@ -13,14 +14,11 @@ import notificationsRoutes from './routes/notifications.js';
 import usersRoutes from './routes/users.js';
 import { sendDeadlineReminders } from './utils/deadlineReminder.js';
 import { apiLimiter } from './rateLimit.js';
-import MongoStore from 'connect-mongo';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
-app.set('trust proxy', 1); // trust first proxy (Render, Heroku, etc.)
-
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   cors: {
@@ -31,7 +29,20 @@ const io = new SocketIOServer(server, {
 
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    // Allow localhost and your deployed frontend
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'https://your-frontend.onrender.com' // <-- replace with your actual deployed frontend URL
+    ];
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -39,17 +50,12 @@ app.use(express.urlencoded({ extended: true }));
 
 // Session setup
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'supersecret',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGO_URL,
-    collectionName: 'sessions',
-  }),
   cookie: {
-    secure: true, // important for HTTPS
-    sameSite: 'None', // allow cross-site cookies
-    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   },
 }));
 
@@ -57,8 +63,23 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/todo-app', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+mongoose.connection.on('connected', () => {
+  console.log('MongoDB connected');
+});
+
+// Basic route
+app.get('/', (req, res) => {
+  res.send('API is running');
+});
+
 // Auth routes
-app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
 // Task routes
 app.use('/api/tasks', (req, res, next) => {
   req.io = io;
@@ -115,10 +136,3 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost:27017/todo-app', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
