@@ -22,7 +22,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   cors: {
-    origin: process.env.CLIENT_URL,
+    origin: 'https://online-todo-mathu-frontend.onrender.com',
     credentials: true
   }
 });
@@ -31,7 +31,7 @@ app.set('trust proxy', 1);
 
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: 'https://online-todo-mathu-frontend.onrender.com',
   credentials: true
 }));
 app.use(express.json());
