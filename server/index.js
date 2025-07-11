@@ -28,7 +28,10 @@ const io = new SocketIOServer(server, {
 });
 
 // Middleware
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:3000', credentials: true }));
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -37,7 +40,10 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'supersecret',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false },
+  cookie: { 
+    secure: true,          // IMPORTANT: true on HTTPS (like Render)
+    sameSite: 'none'       // Allows cross-site cookie sending
+  },
 }));
 
 // Passport setup
@@ -58,6 +64,7 @@ mongoose.connection.on('connected', () => {
 app.get('/', (req, res) => {
   res.send('API is running');
 });
+app.set('trust proxy', 1);
 
 // Auth routes
 app.use('/auth', authRoutes);
