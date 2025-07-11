@@ -17,7 +17,7 @@ router.get(
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
     // Redirect to dashboard or client app after successful login
-    res.redirect(process.env.CLIENT_URL || 'http://localhost:3000');
+    res.redirect(process.env.CLIENT_URL);
   }
 );
 
