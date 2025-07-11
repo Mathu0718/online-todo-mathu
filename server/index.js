@@ -22,28 +22,13 @@ const app = express();
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'https://online-todo-mathu-frontend.onrender.com',
+    origin: process.env.CLIENT_URL || 'http://localhost:3000',
     credentials: true
   }
 });
 
 // Middleware
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin) return callback(null, true);
-    // Allow localhost and your deployed frontend
-    const allowedOrigins = [
-      'https://online-todo-mathu-frontend.onrender.com' // <-- replace with your actual deployed frontend URL
-    ];
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-}));
+app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:3000', credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -52,10 +37,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'supersecret',
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  },
+  cookie: { secure: false },
 }));
 
 // Passport setup

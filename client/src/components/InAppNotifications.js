@@ -8,13 +8,13 @@ export default function InAppNotifications({ user }) {
 
   useEffect(() => {
     // Fetch initial notifications
-    fetch(`${process.env.REACT_APP_API_URL || 'https://online-todo-mathu-backend.onrender.com'}/api/notifications`, {
+    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/notifications`, {
       credentials: 'include',
     })
       .then(res => res.json())
       .then(setNotifications);
     // Listen for real-time notifications
-    socketRef.current = io(process.env.REACT_APP_API_URL || 'https://online-todo-mathu-backend.onrender.com', {
+    socketRef.current = io(process.env.REACT_APP_API_URL || 'http://localhost:5000', {
       withCredentials: true
     });
     socketRef.current.emit('join', user._id);
@@ -29,7 +29,7 @@ export default function InAppNotifications({ user }) {
   }, [user._id]);
 
   const markAllRead = async () => {
-    await fetch(`${process.env.REACT_APP_API_URL || 'https://online-todo-mathu-backend.onrender.com'}/api/notifications/read-all`, {
+    await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/notifications/read-all`, {
       method: 'PUT',
       credentials: 'include',
     });

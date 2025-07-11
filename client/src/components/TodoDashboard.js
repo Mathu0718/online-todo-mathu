@@ -26,7 +26,7 @@ export default function TodoDashboard({ user, onLogout }) {
 
   // Fetch tasks
   const fetchTasks = () => {
-    fetch(`${process.env.REACT_APP_API_URL || 'https://online-todo-mathu-backend.onrender.com'}/api/tasks`, {
+    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/tasks`, {
       credentials: 'include',
     })
       .then(res => res.json())
@@ -36,7 +36,7 @@ export default function TodoDashboard({ user, onLogout }) {
   useEffect(() => {
     fetchTasks();
     // Setup socket.io
-    socketRef.current = io(process.env.REACT_APP_API_URL || 'https://online-todo-mathu-backend.onrender.com', {
+    socketRef.current = io(process.env.REACT_APP_API_URL || 'http://localhost:5000', {
       withCredentials: true
     });
     socketRef.current.emit('join', user._id);
@@ -86,7 +86,7 @@ export default function TodoDashboard({ user, onLogout }) {
         return;
       }
       // Fetch user IDs for emails
-      const res = await fetch(`${process.env.REACT_APP_API_URL || 'https://online-todo-mathu-backend.onrender.com'}/api/users/by-emails`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users/by-emails`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -117,7 +117,7 @@ export default function TodoDashboard({ user, onLogout }) {
       // If user is a collaborator, do not send collaborators field at all
       delete payload.collaborators;
     }
-    const url = `${process.env.REACT_APP_API_URL || 'https://online-todo-mathu-backend.onrender.com'}/api/tasks${editingId ? `/${editingId}` : ''}`;
+    const url = `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/tasks${editingId ? `/${editingId}` : ''}`;
     const method = editingId ? 'PUT' : 'POST';
     const res = await fetch(url, {
       method,
@@ -192,7 +192,7 @@ export default function TodoDashboard({ user, onLogout }) {
 
   // Delete task
   const handleDelete = async id => {
-    await fetch(`${process.env.REACT_APP_API_URL || 'https://online-todo-mathu-backend.onrender.com'}/api/tasks/${id}`, {
+    await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/tasks/${id}`, {
       method: 'DELETE',
       credentials: 'include',
     });
@@ -316,81 +316,9 @@ export default function TodoDashboard({ user, onLogout }) {
         {/* Table Heading: half the dashboard title size (text-2xl) */}
         <div className="flex justify-center w-full" ref={tableRef}>
           <div className="space-y-4 w-full max-w-2xl mx-auto" style={{minWidth: '0'}}>
-            {/* Personal Missions */}
-            <h3 className="text-2xl font-bold text-calm5 mb-2">Personal Missions</h3>
-            {tasks.filter(task => task.owner && task.owner.email === user.email && (!task.collaborators || task.collaborators.length === 0)).length === 0 && (
-              <div className="text-calm5 text-center text-xs">No personal missions yet.</div>
-            )}
-            {tasks.filter(task => task.owner && task.owner.email === user.email && (!task.collaborators || task.collaborators.length === 0)).map(task => (
-              <div key={task._id} className="bg-white/80 rounded-lg shadow p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                <div>
-                  <div className="font-bold text-calm5 text-base">{task.title}</div>
-                  {/* Show description if present */}
-                  {task.description && (
-                    <div className="text-calm5 text-sm mb-1 whitespace-pre-line">{task.description}</div>
-                  )}
-                  {/* Due date and overdue logic */}
-                  <div className="text-calm5 text-sm">{/* was text-xs, now text-sm */
-                    `Due: ${task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}`
-                  }</div>
-                  {task.dueDate && new Date(task.dueDate) < new Date() && (
-                    <span className="ml-2 font-semibold text-[#c0392b] text-sm">
-                      (Overdue by {Math.ceil((new Date() - new Date(task.dueDate)) / (1000 * 60 * 60 * 24))} day{Math.ceil((new Date() - new Date(task.dueDate)) / (1000 * 60 * 60 * 24)) > 1 ? 's' : ''})
-                    </span>
-                  )}
-                  {task.dueDate && new Date(task.dueDate) >= new Date() && (
-                    <span className="ml-2 font-semibold text-[#27ae60] text-sm">
-                      ({Math.ceil((new Date(task.dueDate) - new Date()) / (1000 * 60 * 60 * 24))} day{Math.ceil((new Date(task.dueDate) - new Date()) / (1000 * 60 * 60 * 24)) > 1 ? 's' : ''} left)
-                    </span>
-                  )}
-                  {/* Status logic: show 'Timed Out' if overdue, with color */}
-                  <div className="text-sm mt-1">
-                    Priority: <span className="font-semibold">{task.priority}</span> | Status: <span className={(() => {
-                      if (task.dueDate && new Date(task.dueDate) < new Date()) return 'font-semibold text-[#c0392b]';
-                      if (task.status === 'Completed') return 'font-semibold text-[#27ae60]';
-                      if (task.status === 'In Progress') return 'font-semibold text-[#f39c12]';
-                      return 'font-semibold text-calm5';
-                    })()}>
-                      {task.dueDate && new Date(task.dueDate) < new Date() ? 'Timed Out' : task.status}
-                    </span>
-                  </div>
-                  {/* Only show Collaborators if there are any */}
-                  {(() => {
-                    let collabText = '';
-                    if (task.owner && task.owner.email === user.email) {
-                      collabText = (task.collaborators || [])
-                        .filter(c => c.user && c.user.email !== user.email)
-                        .map(c => c.user.email + (c.canEdit ? ' (can edit)' : ''))
-                        .join(', ');
-                    } else if (task.owner && task.owner.email) {
-                      collabText = task.owner.email;
-                    }
-                    if (collabText) {
-                      return (
-                        <div className="text-calm5 text-sm mt-1">
-                          Collaborators: <span className="font-semibold">{collabText}</span>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })()}
-                </div>
-                <div className="flex flex-row gap-2">
-                  <button onClick={() => handleEdit(task)} className="px-1 py-2 rounded bg-calm2 text-calm5 font-semibold hover:bg-calm3 transition text-sm">
-                    Edit Mission
-                  </button>
-                  <button onClick={() => handleDelete(task._id)} className="px-1 py-2 rounded bg-red-500 text-white font-semibold hover:bg-red-400 transition text-sm">
-                    Delete Mission
-                  </button>
-                </div>
-              </div>
-            ))}
-            {/* Collaborated Missions */}
-            <h3 className="text-2xl font-bold text-calm5 mb-2 mt-8">Collaborated Missions</h3>
-            {tasks.filter(task => (task.owner && task.owner.email === user.email && task.collaborators && task.collaborators.length > 0) || (task.collaborators && task.collaborators.some(c => c.user && c.user.email === user.email))).length === 0 && (
-              <div className="text-calm5 text-center text-xs">No collaborated missions yet.</div>
-            )}
-            {tasks.filter(task => (task.owner && task.owner.email === user.email && task.collaborators && task.collaborators.length > 0) || (task.collaborators && task.collaborators.some(c => c.user && c.user.email === user.email))).map(task => (
+            <h3 className="text-2xl font-bold text-calm5 mb-2">List of Missions</h3>
+            {tasks.length === 0 && <div className="text-calm5 text-center text-xs">No tasks yet.</div>}
+            {tasks.map(task => (
               <div key={task._id} className="bg-white/80 rounded-lg shadow p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                 <div>
                   <div className="font-bold text-calm5 text-base">{task.title}</div>

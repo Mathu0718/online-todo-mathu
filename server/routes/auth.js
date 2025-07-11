@@ -12,7 +12,7 @@ router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
     // Redirect to dashboard or client app after successful login
-    res.redirect(process.env.CLIENT_URL || 'https://online-todo-mathu-frontend.onrender.com');
+    res.redirect(process.env.CLIENT_URL || 'http://localhost:3000');
   }
 );
 
