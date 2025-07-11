@@ -44,6 +44,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'supersecret',
   resave: false,
   saveUninitialized: false,
+  proxy: true,
   cookie: { 
     secure: process.env.NODE_ENV === 'production',          // IMPORTANT: true on HTTPS (like Render)
     sameSite: 'none'       // Allows cross-site cookie sending
