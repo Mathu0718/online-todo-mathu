@@ -5,10 +5,15 @@ import { apiLimiter, authLimiter } from '../rateLimit.js';
 const router = express.Router();
 
 // Google OAuth login
-router.get('/google', authLimiter, passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get(
+  '/google',
+  authLimiter,
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
 
 // Google OAuth callback
-router.get('/google/callback',
+router.get(
+  '/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
     // Redirect to dashboard or client app after successful login
@@ -16,15 +21,24 @@ router.get('/google/callback',
   }
 );
 
-// Logout
-router.get('/logout', (req, res) => {
-  req.logout(() => {
-    res.redirect('/');
-  });
+// Logout route (updated to async style for newer Passport versions)
+router.get('/logout', async (req, res, next) => {
+  try {
+    await req.logout(function (err) {
+      if (err) return next(err);
+      res.redirect('/');
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
-// Get current user
+// Get current user with debug logs
 router.get('/user', (req, res) => {
+  console.log('Session ID:', req.sessionID);
+  console.log('User in session:', req.user);
+  console.log('Is Authenticated:', req.isAuthenticated());
+
   if (req.isAuthenticated()) {
     res.json(req.user);
   } else {
