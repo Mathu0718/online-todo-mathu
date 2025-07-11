@@ -8,14 +8,18 @@ dotenv.config();
 const User = mongoose.model('User');
 
 passport.serializeUser((user, done) => {
+  console.log('✅ serializeUser:', user.id);
   done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
+  console.log('🔍 deserializeUser:', id);
   try {
     const user = await User.findById(id);
+    console.log('✅ User found:', user?.email);
     done(null, user);
   } catch (err) {
+    console.error('❌ Error in deserializeUser:', err);
     done(err, null);
   }
 });
