@@ -36,15 +36,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-app.set('trust proxy', 1);
+app.set('trust proxy', 1); // Keep this at the top if not already
 
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'supersecret',
   resave: false,
   saveUninitialized: false,
+  proxy: true, // 👈 ADD THIS LINE
   cookie: {
     secure: true,
-    sameSite: 'none',
+    sameSite: 'none'
   },
 }));
 
