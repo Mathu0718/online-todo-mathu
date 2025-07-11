@@ -27,8 +27,6 @@ const io = new SocketIOServer(server, {
   }
 });
 
-app.set('trust proxy', 1);
-
 // Middleware
 app.use(cors({
   origin: 'https://online-todo-mathu-frontend.onrender.com',
@@ -38,17 +36,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
+app.set('trust proxy', 1);
 
-// Session setup
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'supersecret',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { 
-    secure: true,          // IMPORTANT: true on HTTPS (like Render)
-    sameSite: 'none'       // Allows cross-site cookie sending
+  cookie: {
+    secure: true,
+    sameSite: 'none',
   },
 }));
+
 
 // Passport setup
 app.use(passport.initialize());
