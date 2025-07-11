@@ -35,9 +35,9 @@ router.get('/logout', async (req, res, next) => {
 
 // Get current user with debug logs
 router.get('/user', (req, res) => {
-  console.log('Session ID:', req.sessionID);
-  console.log('User in session:', req.user);
-  console.log('Is Authenticated:', req.isAuthenticated());
+  console.log('🌐 Session:', req.session);
+  console.log('🔒 req.isAuthenticated:', req.isAuthenticated());
+  console.log('👤 User:', req.user);
 
   if (req.isAuthenticated()) {
     res.json(req.user);
@@ -45,5 +45,6 @@ router.get('/user', (req, res) => {
     res.status(401).json({ message: 'Not authenticated' });
   }
 });
+
 
 export default router;
